@@ -14,30 +14,37 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 var _a, _b, _c, _d;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.syncDatabase = exports.OrderItem = exports.Order = exports.Product = exports.User = exports.sequelize = void 0;
-const sequelize_1 = require("sequelize");
-const config_1 = __importDefault(require("../config/config"));
-const userModel_1 = require("../models/userModel");
+const sequelize_1 = require("sequelize"); // Main Sequelize class used to connect to the database
+const config_1 = __importDefault(require("../config/config")); // database configuration file (like host, username, password, etc.) which exports settings for different environments
+const userModel_1 = require("../models/userModel"); // A class (User, Product, etc.)
 Object.defineProperty(exports, "User", { enumerable: true, get: function () { return userModel_1.User; } });
+//An initXModel() function to register the model with Sequelize
 const productModel_1 = require("../models/productModel");
 Object.defineProperty(exports, "Product", { enumerable: true, get: function () { return productModel_1.Product; } });
 const orderModel_1 = require("../models/orderModel");
 Object.defineProperty(exports, "Order", { enumerable: true, get: function () { return orderModel_1.Order; } });
 const orderItemModel_1 = require("../models/orderItemModel");
 Object.defineProperty(exports, "OrderItem", { enumerable: true, get: function () { return orderItemModel_1.OrderItem; } });
-const env = process.env.NODE_ENV || 'development';
-const dbConfig = config_1.default[env];
-const sequelize = new sequelize_1.Sequelize(dbConfig);
+const env = process.env.NODE_ENV || 'development'; // Checks if the app is running in development or production.
+const dbConfig = config_1.default[env]; // Loads the correct database config (like username, password) based on environment.
+const sequelize = new sequelize_1.Sequelize(dbConfig); // Connect to the database
 exports.sequelize = sequelize;
-// Initialize models
+// Initialize models(Each model is "registered" with Sequelize)
 (0, userModel_1.initUserModel)(sequelize);
 (0, productModel_1.initProductModel)(sequelize);
 (0, orderModel_1.initOrderModel)(sequelize);
 (0, orderItemModel_1.initOrderItemModel)(sequelize);
 // Associate models
+// ?-> This is called optional chaining in JavaScript/TypeScript.it means: If associate exists, then call it.
+//Otherwise, do nothing and avoid crashing the app. 
 (_a = userModel_1.User.associate) === null || _a === void 0 ? void 0 : _a.call(userModel_1.User, { Order: orderModel_1.Order });
 (_b = productModel_1.Product.associate) === null || _b === void 0 ? void 0 : _b.call(productModel_1.Product, { OrderItem: orderItemModel_1.OrderItem });
 (_c = orderModel_1.Order.associate) === null || _c === void 0 ? void 0 : _c.call(orderModel_1.Order, { User: userModel_1.User, OrderItem: orderItemModel_1.OrderItem });
 (_d = orderItemModel_1.OrderItem.associate) === null || _d === void 0 ? void 0 : _d.call(orderItemModel_1.OrderItem, { Order: orderModel_1.Order, Product: productModel_1.Product });
+/* This function:
+Tests the DB connection
+Creates or updates the tables in the database
+Stops the app if DB connection fails */
 const syncDatabase = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield sequelize.authenticate();

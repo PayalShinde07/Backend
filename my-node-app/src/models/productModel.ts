@@ -1,54 +1,70 @@
-import { Model, DataTypes, Sequelize } from 'sequelize';
+// src/models/Product.ts
+import { Model, DataTypes, Optional, Sequelize } from 'sequelize';
 
-export class Product extends Model {
-  public productId!: number;
-  public productName!: string;
-  public brand!: string;
-  public productDesc!: string;
-  public Category!: string;
-  public productPrice!: number;
-  public Qty!: number;
-
-  static associate(models: any) {
-    Product.hasMany(models.OrderItem, { foreignKey: 'productId' });
-  }
+interface ProductAttributes {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  stock: number;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
-export const initProductModel = (sequelize: Sequelize) => {
-  Product.init({
-    productId: { 
-      type: DataTypes.INTEGER, 
-      primaryKey: true, 
-      autoIncrement: true 
+interface ProductCreationAttributes extends Optional<ProductAttributes, 'id'> {}
+
+module.exports = (sequelize: Sequelize, DataTypes: any) => {
+  class Product extends Model<ProductAttributes, ProductCreationAttributes> implements ProductAttributes {
+    public id!: number;
+    public name!: string;
+    public description!: string;
+    public price!: number;
+    public stock!: number;
+
+    public readonly createdAt!: Date;
+    public readonly updatedAt!: Date;
+
+    static associate(models: any) {
+      Product.hasMany(models.OrderItem, {
+        foreignKey: 'productId',
+        as: 'orderItems',
+      });
+    }
+  }
+
+  Product.init(
+    {
+      id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
+      },
+      name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      description: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+      },
+      price: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false,
+        validate: { min: 0 },
+      },
+      stock: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+        validate: { min: 0 },
+      },
     },
-    productName: { 
-      type: DataTypes.STRING, 
-      allowNull: false 
-    },
-    brand: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
-    productDesc: { 
-      type: DataTypes.TEXT,
-      allowNull: false 
-    },
-    Category: { 
-      type: DataTypes.STRING,
-      allowNull: false 
-    },
-    productPrice: { 
-      type: DataTypes.DECIMAL(10, 2), 
-      allowNull: false 
-    },
-    Qty: { 
-      type: DataTypes.INTEGER, 
-      allowNull: false 
-    },
-  }, {
-    sequelize,
-    modelName: 'Product',
-    tableName: 'products',
-    timestamps: false,
-  });
+    {
+      sequelize,
+      modelName: 'Product',
+      tableName: 'Products',
+    }
+  );
+
+  return Product;
 };

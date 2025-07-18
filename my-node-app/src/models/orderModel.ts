@@ -1,60 +1,65 @@
-import { Model, DataTypes, Sequelize } from 'sequelize';
+import { Model, DataTypes, Optional, Sequelize } from 'sequelize';
 
-export class Order extends Model {
-  public orderId!: number;
-  public userId!: number;
-  public payMethod!: string;
-  public payStatus!: string;
-  public status!: string; 
-  public orderDate!: Date;
-  public totalAmount!: number;
-  public shippingAddress!: string;
-
-  static associate(models: any) {
-    Order.belongsTo(models.User, { foreignKey: 'userId' });
-    Order.hasMany(models.OrderItem, { foreignKey: 'orderId' });
-  }
+interface OrderAttributes {
+  id: number;
+  userId: number;
+  totalAmount: number;
+  status: 'pending' | 'shipped' | 'delivered' | 'cancelled';
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
-export const initOrderModel = (sequelize: Sequelize) => {
-  Order.init({
-    orderId: { 
-      type: DataTypes.INTEGER, 
-      primaryKey: true, 
-      autoIncrement: true 
-    },
-    userId: { 
-      type: DataTypes.INTEGER, 
-      allowNull: false 
-    },
-    payMethod: {
-      type: DataTypes.STRING,
-      allowNull: false 
-    },
-    payStatus: { 
-      type: DataTypes.STRING,
-      allowNull: false 
-    },
-    status: { 
-      type: DataTypes.STRING,
-      allowNull: false 
-    },
-    orderDate: { 
-      type: DataTypes.DATE, 
-      allowNull: false 
-    },
-    totalAmount: { 
-      type: DataTypes.DECIMAL(10, 2),
-      allowNull: false 
-    },
-    shippingAddress: {
-      type: DataTypes.TEXT,
-      allowNull: false
+interface OrderCreationAttributes extends Optional<OrderAttributes, 'id'> {}
+
+module.exports = (sequelize: Sequelize, DataTypes: any) => {
+  class Order extends Model<OrderAttributes, OrderCreationAttributes> implements OrderAttributes {
+    public id!: number;
+    public userId!: number;
+    public totalAmount!: number;
+    public status!: 'pending' | 'shipped' | 'delivered' | 'cancelled';
+
+    public readonly createdAt!: Date;
+    public readonly updatedAt!: Date;
+
+    static associate(models: any) {
+      Order.belongsTo(models.User, {
+        foreignKey: 'userId',
+        as: 'user',
+      });
+      Order.hasMany(models.OrderItem, {
+        foreignKey: 'orderId',
+        as: 'orderItems',
+      });
     }
-  }, {
-    sequelize,
-    modelName: 'Order',
-    tableName: 'orders',
-    timestamps: false,
-  });
+  }
+
+  Order.init(
+    {
+      id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
+      },
+      userId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+      },
+      totalAmount: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false,
+        validate: { min: 0 },
+      },
+      status: {
+        type: DataTypes.ENUM('pending', 'shipped', 'delivered', 'cancelled'),
+        defaultValue: 'pending',
+      },
+    },
+    {
+      sequelize,
+      modelName: 'Order',
+      tableName: 'Orders',
+    }
+  );
+
+  return Order;
 };

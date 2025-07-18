@@ -1,38 +1,48 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.initOrderItemModel = exports.OrderItem = void 0;
+// src/models/OrderItem.ts
 const sequelize_1 = require("sequelize");
-class OrderItem extends sequelize_1.Model {
-    static associate(models) {
-        OrderItem.belongsTo(models.Order, { foreignKey: 'orderId' });
-        OrderItem.belongsTo(models.Product, { foreignKey: 'productId' });
+module.exports = (sequelize, DataTypes) => {
+    class OrderItem extends sequelize_1.Model {
+        static associate(models) {
+            OrderItem.belongsTo(models.Order, {
+                foreignKey: 'orderId',
+                as: 'order',
+            });
+            OrderItem.belongsTo(models.Product, {
+                foreignKey: 'productId',
+                as: 'product',
+            });
+        }
     }
-}
-exports.OrderItem = OrderItem;
-const initOrderItemModel = (sequelize) => {
     OrderItem.init({
-        orderItemId: {
-            type: sequelize_1.DataTypes.INTEGER,
+        id: {
+            type: DataTypes.INTEGER,
+            autoIncrement: true,
             primaryKey: true,
-            autoIncrement: true
         },
         orderId: {
-            type: sequelize_1.DataTypes.INTEGER,
-            allowNull: false
+            type: DataTypes.INTEGER,
+            allowNull: false,
         },
         productId: {
-            type: sequelize_1.DataTypes.INTEGER,
-            allowNull: false
+            type: DataTypes.INTEGER,
+            allowNull: false,
         },
         quantity: {
-            type: sequelize_1.DataTypes.INTEGER,
-            allowNull: false
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            validate: { min: 1 },
+        },
+        priceAtPurchase: {
+            type: DataTypes.DECIMAL(10, 2),
+            allowNull: false,
+            validate: { min: 0 },
         },
     }, {
         sequelize,
         modelName: 'OrderItem',
-        tableName: 'order_items',
-        timestamps: false,
+        tableName: 'OrderItems',
     });
+    return OrderItem;
 };
-exports.initOrderItemModel = initOrderItemModel;

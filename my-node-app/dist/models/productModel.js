@@ -1,49 +1,45 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.initProductModel = exports.Product = void 0;
+// src/models/Product.ts
 const sequelize_1 = require("sequelize");
-class Product extends sequelize_1.Model {
-    static associate(models) {
-        Product.hasMany(models.OrderItem, { foreignKey: 'productId' });
+module.exports = (sequelize, DataTypes) => {
+    class Product extends sequelize_1.Model {
+        static associate(models) {
+            Product.hasMany(models.OrderItem, {
+                foreignKey: 'productId',
+                as: 'orderItems',
+            });
+        }
     }
-}
-exports.Product = Product;
-const initProductModel = (sequelize) => {
     Product.init({
-        productId: {
-            type: sequelize_1.DataTypes.INTEGER,
+        id: {
+            type: DataTypes.INTEGER,
+            autoIncrement: true,
             primaryKey: true,
-            autoIncrement: true
         },
-        productName: {
-            type: sequelize_1.DataTypes.STRING,
-            allowNull: false
+        name: {
+            type: DataTypes.STRING,
+            allowNull: false,
         },
-        brand: {
-            type: sequelize_1.DataTypes.STRING,
-            allowNull: false
+        description: {
+            type: DataTypes.TEXT,
+            allowNull: true,
         },
-        productDesc: {
-            type: sequelize_1.DataTypes.TEXT,
-            allowNull: false
+        price: {
+            type: DataTypes.DECIMAL(10, 2),
+            allowNull: false,
+            validate: { min: 0 },
         },
-        Category: {
-            type: sequelize_1.DataTypes.STRING,
-            allowNull: false
-        },
-        productPrice: {
-            type: sequelize_1.DataTypes.DECIMAL(10, 2),
-            allowNull: false
-        },
-        Qty: {
-            type: sequelize_1.DataTypes.INTEGER,
-            allowNull: false
+        stock: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            defaultValue: 0,
+            validate: { min: 0 },
         },
     }, {
         sequelize,
         modelName: 'Product',
-        tableName: 'products',
-        timestamps: false,
+        tableName: 'Products',
     });
+    return Product;
 };
-exports.initProductModel = initProductModel;

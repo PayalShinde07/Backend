@@ -5,7 +5,8 @@ dotenv.config();
 
 interface Config {
   development: SequelizeOptions;
-  
+  test: SequelizeOptions;
+  production: SequelizeOptions;
 }
 
 const config: Config = {
@@ -24,6 +25,34 @@ const config: Config = {
       idle    : 10000,
     },
     define   : {}
-  }
+  },
+   test: {
+        username: process.env.TESTDB_USER || 'backendAdmin',
+        password: process.env.TESTDB_PASSWORD || '12345',
+        database: process.env.TESTDB_NAME || 'CDP',
+        host: process.env.TESTDB_HOST || 'localhost',
+        port: parseInt(process.env.TESTDB_PORT || '1433', 10),
+        dialect: 'mssql',
+        logging: console.log,
+        pool: {
+            max: 5,
+        }
+    },
+    production: {
+        username: process.env.PRODDB_USER || 'backendAdmin',
+        password: process.env.PRODDB_PASSWORD || '12345',
+        database: process.env.PRODDB_NAME || 'CDP',
+        host: process.env.PRODDB_HOST || 'localhost',
+        port: parseInt(process.env.PRODDB_PORT || '1433', 10),
+        dialect: 'mssql',
+        logging: console.log,
+        pool: {
+            max: 5,
+            min: 0,
+            acquire: 30000,
+            idle: 10000,
+        },
+        define: {}
+    }
 };
 export default config;

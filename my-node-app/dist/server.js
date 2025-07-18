@@ -14,24 +14,27 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const dotenv_1 = __importDefault(require("dotenv"));
-const model_1 = require("./models/model");
-const middleware_1 = __importDefault(require("./middleware/middleware"));
+const models_1 = require("./models");
+const user_1 = __importDefault(require("./routes/user"));
+const product_1 = __importDefault(require("./routes/product"));
+const order_1 = __importDefault(require("./routes/order"));
+const orderItem_1 = __importDefault(require("./routes/orderItem"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 3000;
 app.use(express_1.default.json());
-app.use(middleware_1.default);
+app.use('/users', user_1.default);
+app.use('/products', product_1.default);
+app.use('/orders', order_1.default);
+app.use('/oredr_items', orderItem_1.default);
 app.get('/', (req, res) => {
-    res.send("Server is running.");
-});
-app.all('/secret', middleware_1.default, (req, res) => {
-    res.send("Accessed secret route.");
+    res.send('Hello World');
 });
 function startServer() {
     return __awaiter(this, void 0, void 0, function* () {
-        yield (0, model_1.syncDatabase)();
+        yield (0, models_1.syncDatabase)();
         app.listen(PORT, () => {
-            console.log(`Server running on Port ${PORT}`);
+            console.log(`Server running on port ${PORT}`);
         });
     });
 }

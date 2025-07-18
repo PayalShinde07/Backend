@@ -1,28 +1,32 @@
-import express,{Request,Response,Application} from 'express';
+import express, {Request, Response, Application } from 'express';
 import dotenv from 'dotenv';
-import db,{syncDatabase} from './models/model';
-import Middleware from './middleware/middleware';
+import sequelize, { syncDatabase } from './models';
+import userRouter from './routes/user';
+import productRouter from './routes/product';
+import orderRouter from './routes/order';
+import orderItemRouter from './routes/orderItem';
+
 dotenv.config();
 
-const app:Application=express();
-const PORT=process.env.PORT || 3000;
+const app: Application = express();
+const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
-app.use(Middleware); 
+
+app.use('/users', userRouter);
+app.use('/products', productRouter);
+app.use('/orders', orderRouter);
+app.use('/orderitems', orderItemRouter);
 
 app.get('/', (req: Request, res: Response) => {
-  res.send("Server is running.");
+    res.send('Hello World');
 });
 
-app.all('/secret',Middleware,(req:Request,res:Response)=>{
-  res.send("Accessed secret route.");
-})
-
-async function startServer() {
+async function startServer(){
   await syncDatabase();
-  app.listen(PORT,()=>{
-    console.log(`Server running on Port ${PORT}`)
-  })
+  app.listen(PORT, ()=>{
+    console.log(`Server running on port ${PORT}`);
+  });
 }
-startServer().catch(console.error);
 
+startServer().catch(console.error);
